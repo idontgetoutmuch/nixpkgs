@@ -1,7 +1,7 @@
 { lib, stdenv, fetchurl, fetchFromGitHub, perl, curl, bzip2, sqlite, openssl ? null, xz
 , pkgconfig, boehmgc, perlPackages, libsodium, aws-sdk-cpp, brotli
 , autoreconfHook, autoconf-archive, bison, flex, libxml2, libxslt, docbook5, docbook5_xsl
-, libseccomp, busybox
+, libseccomp, busybox-sandbox-shell
 , hostPlatform
 , storeDir ? "/nix/store"
 , stateDir ? "/nix/var"
@@ -10,17 +10,7 @@
 
 let
 
-  sh = busybox.override {
-    useMusl = true;
-    enableStatic = true;
-    enableMinimal = true;
-    extraConfig = ''
-      CONFIG_ASH y
-      CONFIG_ASH_BUILTIN_ECHO y
-      CONFIG_ASH_BUILTIN_TEST y
-      CONFIG_ASH_OPTIMIZE_FOR_SIZE y
-    '';
-  };
+  sh = busybox-sandbox-shell;
 
   common = { name, suffix ? "", src, fromGit ? false }: stdenv.mkDerivation rec {
     inherit name src;
@@ -161,12 +151,12 @@ in rec {
 
   nixUnstable = (lib.lowPrio (common rec {
     name = "nix-2.0${suffix}";
-    suffix = "pre5889_c287d731";
+    suffix = "pre5950_3a5a241b";
     src = fetchFromGitHub {
       owner = "NixOS";
       repo = "nix";
-      rev = "c287d7312103bae5e154c0c4dd493371a22ea207";
-      sha256 = "1dwhz93dlk62prh3wfwf8vxfcqjdn21wk0ms65kf5r8ahkfgpgq4";
+      rev = "3a5a241b3209f14f8801b902ba20b5cb0666c9df";
+      sha256 = "0cwjyhgyfzi2dz561nj897zhkbyx6lzi49avcyia2pr4498jcl6k";
     };
     fromGit = true;
   })) // { perl-bindings = perl-bindings { nix = nixUnstable; }; };

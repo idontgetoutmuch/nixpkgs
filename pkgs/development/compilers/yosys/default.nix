@@ -2,18 +2,24 @@
 , pkgconfig, tcl, readline, libffi, python3, bison, flex
 }:
 
+with builtins;
+
 stdenv.mkDerivation rec {
   name = "yosys-${version}";
-  version = "2018.01.10";
+  version = "2018.02.14";
 
   srcs = [
     (fetchFromGitHub {
-      owner  = "cliffordwolf";
+      owner  = "yosyshq";
       repo   = "yosys";
-      rev    = "9ac560f5d3e5847b7e475195f66b7034e91fd938";
-      sha256 = "01p1bcjq030y7g21lsghgkqj23x6yl8cwrcx2xpik45xls6pxrg7";
+      rev    = "c1abd3b02cab235334342f3520e2535eb74c5792";
+      sha256 = "0pzrplv4p0qzy115rg19lxv4w274iby337zfd7hhlinnpx3gzqvw";
       name   = "yosys";
     })
+
+    # NOTE: the version of abc used here is synchronized with
+    # the one in the yosys Makefile of the version above;
+    # keep them the same for quality purposes.
     (fetchFromBitbucket {
       owner  = "alanmi";
       repo   = "abc";
@@ -27,6 +33,12 @@ stdenv.mkDerivation rec {
   enableParallelBuilding = true;
   nativeBuildInputs = [ pkgconfig ];
   buildInputs = [ tcl readline libffi python3 bison flex ];
+
+  patchPhase = ''
+    substituteInPlace ./Makefile \
+      --replace 'echo UNKNOWN' 'echo ${substring 0 10 (elemAt srcs 0).rev}'
+  '';
+
   preBuild = ''
     chmod -R u+w ../yosys-abc
     ln -s ../yosys-abc abc

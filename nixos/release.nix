@@ -1,4 +1,4 @@
-{ nixpkgs ? { outPath = ./..; revCount = 56789; shortRev = "gfedcba"; }
+{ nixpkgs ? { outPath = (import ../lib).cleanSource ./..; revCount = 56789; shortRev = "gfedcba"; }
 , stableBranch ? false
 , supportedSystems ? [ "x86_64-linux" "aarch64-linux" ]
 }:
@@ -244,6 +244,7 @@ in rec {
   tests.containers-macvlans = callTest tests/containers-macvlans.nix {};
   tests.couchdb = callTest tests/couchdb.nix {};
   tests.docker = callTestOnTheseSystems ["x86_64-linux"] tests/docker.nix {};
+  tests.docker-tools = callTestOnTheseSystems ["x86_64-linux"] tests/docker-tools.nix {};
   tests.docker-edge = callTestOnTheseSystems ["x86_64-linux"] tests/docker-edge.nix {};
   tests.dovecot = callTest tests/dovecot.nix {};
   tests.dnscrypt-proxy = callTestOnTheseSystems ["x86_64-linux"] tests/dnscrypt-proxy.nix {};
@@ -257,8 +258,10 @@ in rec {
   tests.firefox = callTest tests/firefox.nix {};
   tests.firewall = callTest tests/firewall.nix {};
   tests.fleet = callTestOnTheseSystems ["x86_64-linux"] tests/fleet.nix {};
+  tests.fwupd = callTest tests/fwupd.nix {};
   #tests.gitlab = callTest tests/gitlab.nix {};
   tests.gitolite = callTest tests/gitolite.nix {};
+  tests.gjs = callTest tests/gjs.nix {};
   tests.gocd-agent = callTest tests/gocd-agent.nix {};
   tests.gocd-server = callTest tests/gocd-server.nix {};
   tests.gnome3 = callTest tests/gnome3.nix {};
@@ -276,6 +279,7 @@ in rec {
   tests.ipv6 = callTest tests/ipv6.nix {};
   tests.jenkins = callTest tests/jenkins.nix {};
   tests.plasma5 = callTest tests/plasma5.nix {};
+  tests.plotinus = callTest tests/plotinus.nix {};
   tests.keymap = callSubTests tests/keymap.nix {};
   tests.initrdNetwork = callTest tests/initrd-network.nix {};
   tests.kafka_0_9 = callTest tests/kafka_0_9.nix {};
@@ -292,6 +296,7 @@ in rec {
   tests.login = callTest tests/login.nix {};
   #tests.logstash = callTest tests/logstash.nix {};
   tests.mathics = callTest tests/mathics.nix {};
+  tests.matrix-synapse = callTest tests/matrix-synapse.nix {};
   tests.mesos = callTest tests/mesos.nix {};
   tests.misc = callTest tests/misc.nix {};
   tests.mongodb = callTest tests/mongodb.nix {};
@@ -325,6 +330,7 @@ in rec {
   tests.pgmanage = callTest tests/pgmanage.nix {};
   tests.postgis = callTest tests/postgis.nix {};
   #tests.pgjwt = callTest tests/pgjwt.nix {};
+  tests.predictable-interface-names = callSubTests tests/predictable-interface-names.nix {};
   tests.printing = callTest tests/printing.nix {};
   tests.prometheus = callTest tests/prometheus.nix {};
   tests.proxy = callTest tests/proxy.nix {};
@@ -332,7 +338,9 @@ in rec {
   # tests.quagga = callTest tests/quagga.nix {};
   tests.quake3 = callTest tests/quake3.nix {};
   tests.radicale = callTest tests/radicale.nix {};
+  tests.rspamd = callSubTests tests/rspamd.nix {};
   tests.runInMachine = callTest tests/run-in-machine.nix {};
+  tests.rxe = callTest tests/rxe.nix {};
   tests.samba = callTest tests/samba.nix {};
   tests.sddm = callSubTests tests/sddm.nix {};
   tests.simple = callTest tests/simple.nix {};
@@ -350,6 +358,7 @@ in rec {
   tests.wordpress = callTest tests/wordpress.nix {};
   tests.xfce = callTest tests/xfce.nix {};
   tests.xmonad = callTest tests/xmonad.nix {};
+  tests.yabar = callTest tests/yabar.nix {};
   tests.zookeeper = callTest tests/zookeeper.nix {};
 
   /* Build a bunch of typical closures so that Hydra can keep track of
