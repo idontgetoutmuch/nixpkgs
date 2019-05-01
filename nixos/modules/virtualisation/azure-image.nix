@@ -2,13 +2,17 @@
 
 with lib;
 let
-  diskSize = 2048;
+  diskSize = 1536;
 in
 {
   system.build.azureImage = import ../../lib/make-disk-image.nix {
     name = "azure-image";
     postVM = ''
-      ${pkgs.vmTools.qemu}/bin/qemu-img convert -f raw -o subformat=fixed,force_size -O vpc $diskImage $out/disk.vhd
+      set -e
+      export disk="$out/nixos-image-${config.system.nixos.label}-${pkgs.stdenv.hostPlatform.system}.vhd"
+      ${pkgs.vmTools.qemu}/bin/qemu-img convert -f raw -o subformat=fixed,force_size -O vpc $diskImage $disk
+      rm -f $diskImage
+      ln -s $disk $out/disk.vhd
     '';
     configFile = ./azure-config-user.nix;
     format = "raw";
@@ -20,6 +24,13 @@ in
 
   # Azure metadata is available as a CD-ROM drive.
   fileSystems."/metadata".device = "/dev/sr0";
+  fileSystems."/" = {
+    autoResize = true;
+    fsType = "ext4";
+  };
+
+  boot.growPartition = true;
+  services.udisks2.enable = false;
 
   systemd.services.fetch-ssh-keys =
     { description = "Fetch host keys and authorized_keys for root user";
@@ -56,5 +67,4 @@ in
       serviceConfig.StandardError = "journal+console";
       serviceConfig.StandardOutput = "journal+console";
      };
-
 }
