@@ -11,11 +11,11 @@ images="../../../modules/virtualisation/azure-images.nix"
 
 function build() {
   rev="${1}"
-  nix-build "${images}" -A "${rev}.image" --out-link "result/${rev}" &> "result/${rev}_buildlog";
+  nix-build "${images}" -A "${rev}.machine.config.system.build.azureImage" --out-link "result/${rev}" |& tee "result/${rev}_buildlog";
   
   # note, this saves the nice label name separately (used for old images that
   # just name their output disk "disk.vhd")
-  nix eval -f "${images}" "${rev}.imageName" --raw > "result/${rev}_name"
+  nix eval -f "${images}" "${rev}.name" --raw > "result/${rev}_name"
 }
 
 rm -rf "${OUTDIR}"

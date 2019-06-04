@@ -19,7 +19,14 @@ with lib;
   # way to select them anyway.
   boot.loader.grub.configurationLimit = 0;
 
-  fileSystems."/".device = "/dev/disk/by-label/nixos";
+  fileSystems."/metadata".device = "/dev/sr0"; # Azure metadata
+  fileSystems."/" = {
+    device = "/dev/disk/by-label/nixos";
+    autoResize = true;
+    fsType = "ext4";
+  };
+  boot.growPartition = true;
+  services.udisks2.enable = false;
 
   # Allow root logins only using the SSH key that the user specified
   # at instance creation time, ping client connections to avoid timeouts
@@ -28,8 +35,6 @@ with lib;
   services.openssh.extraConfig = ''
     ClientAliveInterval 180
   '';
-
-  services.udisks2.enable = false;
 
   # Force getting the hostname from Azure
   networking.hostName = mkDefault "";
@@ -60,7 +65,41 @@ with lib;
     ENV{DEVTYPE}=="disk", KERNEL!="sda" SUBSYSTEM=="block", SUBSYSTEMS=="scsi", KERNELS=="?:0:0:13", ATTR{removable}=="0", SYMLINK+="disk/by-lun/13"
     ENV{DEVTYPE}=="disk", KERNEL!="sda" SUBSYSTEM=="block", SUBSYSTEMS=="scsi", KERNELS=="?:0:0:14", ATTR{removable}=="0", SYMLINK+="disk/by-lun/14"
     ENV{DEVTYPE}=="disk", KERNEL!="sda" SUBSYSTEM=="block", SUBSYSTEMS=="scsi", KERNELS=="?:0:0:15", ATTR{removable}=="0", SYMLINK+="disk/by-lun/15"
-
   '';
 
+  systemd.services.fetch-ssh-keys = {
+    description = "Fetch host keys and authorized_keys for root user";
+
+    wantedBy = [ "sshd.service" "waagent.service" ];
+    before = [ "sshd.service" "waagent.service" ];
+    after = [ "local-fs.target" ];
+
+    path  = [ pkgs.coreutils ];
+    script =
+      ''
+        eval "$(cat /metadata/CustomData.bin)"
+        if ! [ -z "$ssh_host_ecdsa_key" ]; then
+          echo "downloaded ssh_host_ecdsa_key"
+          echo "$ssh_host_ecdsa_key" > /etc/ssh/ssh_host_ed25519_key
+          chmod 600 /etc/ssh/ssh_host_ed25519_key
+        fi
+
+        if ! [ -z "$ssh_host_ecdsa_key_pub" ]; then
+          echo "downloaded ssh_host_ecdsa_key_pub"
+          echo "$ssh_host_ecdsa_key_pub" > /etc/ssh/ssh_host_ed25519_key.pub
+          chmod 644 /etc/ssh/ssh_host_ed25519_key.pub
+        fi
+
+        if ! [ -z "$ssh_root_auth_key" ]; then
+          echo "downloaded ssh_root_auth_key"
+          mkdir -m 0700 -p /root/.ssh
+          echo "$ssh_root_auth_key" > /root/.ssh/authorized_keys
+          chmod 600 /root/.ssh/authorized_keys
+        fi
+      '';
+    serviceConfig.Type = "oneshot";
+    serviceConfig.RemainAfterExit = true;
+    serviceConfig.StandardError = "journal+console";
+    serviceConfig.StandardOutput = "journal+console";
+  };
 }

@@ -1,15 +1,5 @@
 # nixos/azure
 
-### TODO:
-
-1. Shrinkage
-
-### NOTES:
-1. This uses the `azure-images.nix` specified in THIS TREE's `nixpkgs/nixos`.
-2. This uses the hard-coded nixpkgs references in that file for building the images themselves.
-3. This requires **`docker`**. If you can get `azure-cli` working, I'd love to drop docker, but for now it's the only reliable/consistent way to get the Azure CLI running in NixOS.
-
-
 ### Usage
 
 #### Create & Upload "Official" Images
