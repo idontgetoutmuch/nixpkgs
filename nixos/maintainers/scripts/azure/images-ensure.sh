@@ -7,7 +7,7 @@ unset NIXOS_CONFIG
 unset NIX_PATH
 
 OUTDIR="./result"
-images="../../../modules/virtualisation/azure-images.nix"
+images="./azure-images-src.nix"
 
 function build() {
   rev="${1}"
@@ -24,9 +24,7 @@ mkdir -p "${OUTDIR}"
 # TODO: replace this with something that lists out the
 # images that don't have a URI yet
 declare -a builds=(
-  "nixos__cmpkgs"
-  #"nixos_19_03__606306e0eaacdaba1d3ada33485ae4cb413faeb5"
-  #"nixos_unstable__4ab1c14714fc97a27655f3a6877386da3cb237bc"
+  "nixos_19_03__606306e0eaacdaba1d3ada33485ae4cb413faeb5"
 )
 
 for brev in "${builds[@]}"; do

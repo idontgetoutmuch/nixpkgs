@@ -38,6 +38,10 @@ imageid="/subscriptions/aff271ee-e9be-4441-b9bb-42f5af4cbaeb/resourceGroups/NIXO
 `mkvm.sh` takes an Azure image id that looks like this: `/subscriptions/aff271ee-e9be-4441-b9bb-42f5af4cbaeb/resourceGroups/NIXOS_PRODUCTION/providers/Microsoft.Compute/images/nixos-image-19.09.git.cmpkgs3-x86_64-linux.vhd`. You only need to create an image once in your subscription (unless you need more replicas for high capacity reasons, etc).
 
 
+#### Custom Image
+
+`custom-image-example/` contains an example of a custom image.
+
 ### Background
 
 This functionality is somewhat non-trivial. It handles:
