@@ -10,9 +10,10 @@ stdenv.mkDerivation rec {
     sha256 = "19ca4nmlf6i9ijqcibyvpprxzsdfnackgjs6dw51fq13gg1f2398";
   };
 
-  preConfigure = ''
-    export cmakeFlags="-DCMAKE_INSTALL_PREFIX=$out -DEXAMPLES_INSTALL_PATH=$out/share/examples $cmakeFlags"
-  '';
+
+  cmakeFlags = [
+    "-DEXAMPLES_INSTALL_PATH=${placeholder "out"}/share/examples"
+  ];
 
   nativeBuildInputs = [ cmake ];
   buildInputs = [ python ];
