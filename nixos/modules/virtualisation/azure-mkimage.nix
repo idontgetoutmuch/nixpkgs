@@ -2,7 +2,7 @@ let
   mkAzureImage = {
     nixpkgs,
     rev,
-    configFile ? ["${nixpkgs}/nixos/modules/virtualisation/azure-config-user.nix"],
+    configFile ? "${nixpkgs}/nixos/modules/virtualisation/azure-config-user.nix",
     diskSize?1536,
     ... 
   }:

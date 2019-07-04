@@ -69,7 +69,7 @@ az storage blob show --container "$AZURE_STORAGE_CONTAINER" --name "$imgname" >/
     fi
   )
 while true; do
-  status="$(az storage blob show --container "$AZURE_STORAGE_CONTAINER" --name "$imgname")"
+  status="$(az storage blob show --container "$AZURE_STORAGE_CONTAINER" --name "$imgname" | head -n -1 -)"
   status="$(echo "${status}" | jq -r '.properties.copy.status')"
   [[ "${status}" == "success" || "${status}" == "null" ]] && break
   sleep 5
@@ -78,13 +78,13 @@ done;
 az image show -g "${AZURE_RESOURCE_GROUP}" -n "$imgname" >/dev/null || \
   az image create \
     --name "$imgname" \
-    --source "$(az storage blob url -c "$AZURE_STORAGE_CONTAINER" -n "$imgname" -o tsv | tr -d '\r')" \
+    --source "$(az storage blob url -c "$AZURE_STORAGE_CONTAINER" -n "$imgname" -o tsv | tr -d '\r' | tr -d '\n')" \
     --resource-group "${AZURE_RESOURCE_GROUP}" \
     --location "${AZURE_LOCATION}" \
     --storage-sku "Premium_LRS" \
     --os-disk-caching ReadWrite \
     --os-type "Linux" >/dev/null
 
-imgid="$(az image show -g "${AZURE_RESOURCE_GROUP}" -n "$imgname" -o tsv --query 'id' | tr -d '\r')"
+imgid="$(az image show -g "${AZURE_RESOURCE_GROUP}" -n "$imgname" -o tsv --query 'id' | tr -d '\r' | tr -d '\n')"
 echo -n "${imgid}"
 exit 0

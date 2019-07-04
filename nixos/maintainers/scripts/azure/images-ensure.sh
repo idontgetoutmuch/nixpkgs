@@ -11,7 +11,10 @@ images="./azure-images-src.nix"
 
 function build() {
   rev="${1}"
-  nix-build "${images}" -A "${rev}.machine.config.system.build.azureImage" --out-link "result/${rev}" |& tee "result/${rev}_buildlog";
+  nix-build "${images}" \
+    -A "${rev}.machine.config.system.build.azureImage" \
+    --out-link "result/${rev}" \
+    |& tee "result/${rev}_buildlog";
   
   # note, this saves the nice label name separately (used for old images that
   # just name their output disk "disk.vhd")
