@@ -1,4 +1,5 @@
-{ cmake, fetchurl, python, stdenv }:
+{ cmake, fetchurl, python, stdenv,
+  openblas, gfortran, lapackSupport ? true }:
 
 stdenv.mkDerivation rec {
 
@@ -10,13 +11,17 @@ stdenv.mkDerivation rec {
     sha256 = "19ca4nmlf6i9ijqcibyvpprxzsdfnackgjs6dw51fq13gg1f2398";
   };
 
+  buildInputs = [ python ] ++
+                stdenv.lib.optionals (lapackSupport) [ openblas gfortran ];
+  nativeBuildInputs = [ cmake gfortran ];
 
   cmakeFlags = [
-    "-DEXAMPLES_INSTALL_PATH=${placeholder "out"}/share/examples"
+    "-DEXAMPLES_INSTALL_PATH=${placeholder "out"}/share/examples" ] ++
+    stdenv.lib.optionals (lapackSupport) [
+      "-DSUNDIALS_INDEX_TYPE=int32_t"
+      "-DLAPACK_ENABLE=ON"
+      "-DLAPACK_LIBRARIES=-lopenblas"
   ];
-
-  nativeBuildInputs = [ cmake ];
-  buildInputs = [ python ];
 
   meta = with stdenv.lib; {
     description = "Suite of nonlinear differential/algebraic equation solvers";
