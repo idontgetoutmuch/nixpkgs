@@ -2,23 +2,26 @@
 set -euo pipefail
 set -x
 
+# TODO: upload to primary location
+# upload to ALL locations, skip primary, using URL from primary as blob copy source
+
 # look ma, no NIX_PATH!
 unset NIXOS_CONFIG
 unset NIX_PATH
 
-OUTDIR="./result"
+OUTDIR="./azure-result"
 images="./azure-images-src.nix"
 
 function build() {
   rev="${1}"
   nix-build "${images}" \
     -A "${rev}.machine.config.system.build.azureImage" \
-    --out-link "result/${rev}" \
-    |& tee "result/${rev}_buildlog";
+    --out-link "${OUTDIR}/${rev}" \
+    |& tee "${OUTDIR}/${rev}_buildlog";
   
   # note, this saves the nice label name separately (used for old images that
   # just name their output disk "disk.vhd")
-  nix eval -f "${images}" "${rev}.name" --raw > "result/${rev}_name"
+  nix eval -f "${images}" "${rev}.name" --raw > "${OUTDIR}/${rev}_name"
 }
 
 rm -rf "${OUTDIR}"
@@ -37,8 +40,8 @@ done
 for brev in "${builds[@]}"; do
   url="$(./mkimage.sh \
     upload \
-    "result/${brev}/disk.vhd" \
-    "$(cat "result/${brev}_name")")"
+    "${OUTDIR}/${brev}/disk.vhd" \
+    "$(cat "${OUTDIR}/${brev}_name")")"
 
   echo "${brev}: ${url}"
 done
