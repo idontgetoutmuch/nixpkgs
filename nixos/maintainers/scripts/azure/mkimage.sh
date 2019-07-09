@@ -44,7 +44,7 @@ if ! az group show -n "${AZURE_RESOURCE_GROUP}" >/dev/stderr; then
 fi
 
 if az image show -n "$imgname" -g "${AZURE_RESOURCE_GROUP}" &>/dev/stderr; then
-  imgid="$(az image show -g "${AZURE_RESOURCE_GROUP}" -n "$imgname" -o tsv --query 'id' | tr -d '\r')"
+  imgid="$(az image show -g "${AZURE_RESOURCE_GROUP}" -n "$imgname" -o tsv --query 'id')"
   echo -n "${imgid}"
   exit 0
 fi
@@ -52,7 +52,7 @@ fi
 az storage account show -n "$AZURE_STORAGE_ACCOUNT" -g "${AZURE_RESOURCE_GROUP}" >/dev/stderr || \
   az storage account create -n "$AZURE_STORAGE_ACCOUNT" -g "${AZURE_RESOURCE_GROUP}" --sku "$AZURE_STORAGE_TYPE" --kind "StorageV2" >/dev/stderr
 export AZURE_STORAGE_CONNECTION_STRING="$(az storage account show-connection-string \
-  -n "$AZURE_STORAGE_ACCOUNT" -g "${AZURE_RESOURCE_GROUP}" --query connectionString --output tsv | tr -d '\r')"
+  -n "$AZURE_STORAGE_ACCOUNT" -g "${AZURE_RESOURCE_GROUP}" --query connectionString --output tsv)"
 az storage container show -n "$AZURE_STORAGE_CONTAINER" >/dev/stderr || \
   az storage container create \
   --name "$AZURE_STORAGE_CONTAINER" \
@@ -74,16 +74,17 @@ az storage blob show --container "$AZURE_STORAGE_CONTAINER" --name "$imgname" >/
     fi
   )
 while true; do
-  status="$(az storage blob show --container "$AZURE_STORAGE_CONTAINER" --name "$imgname" | head -n -1 -)"
+  status="$(az storage blob show --container "$AZURE_STORAGE_CONTAINER" --name "$imgname")"
   status="$(echo "${status}" | jq -r '.properties.copy.status')"
   [[ "${status}" == "success" || "${status}" == "null" ]] && break
   sleep 5
 done;
 
-imgurl="$(az storage blob url -c "$AZURE_STORAGE_CONTAINER" -n "$imgname" -o tsv | tr -d "'" | tr -d '\r' | tr -d '\n')"
+imgurl="$(az storage blob url -c "$AZURE_STORAGE_CONTAINER" -n "$imgname" -o json | tr -d "\"")"
 
 az image show -g "${AZURE_RESOURCE_GROUP}" -n "$imgname" >/dev/stderr || \
   az image create \
+  --debug \
     --name "$imgname" \
     --source "${imgurl}" \
     --resource-group "${AZURE_RESOURCE_GROUP}" \
@@ -92,6 +93,6 @@ az image show -g "${AZURE_RESOURCE_GROUP}" -n "$imgname" >/dev/stderr || \
     --os-disk-caching ReadWrite \
     --os-type "Linux" >/dev/stderr
 
-imgid="$(az image show -g "${AZURE_RESOURCE_GROUP}" -n "$imgname" -o tsv --query 'id' | tr -d '\r' | tr -d '\n')"
+imgid="$(az image show -g "${AZURE_RESOURCE_GROUP}" -n "$imgname" -o tsv --query 'id')"
 echo -n "${imgid}"
 exit 0

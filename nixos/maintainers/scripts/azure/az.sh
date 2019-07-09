@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 sudo docker run \
-  -it \
   -v /nix:/nix \
   -v /tmp/azure-cli:/tmp/azure-cli \
   -e "AZURE_CONFIG_DIR=/tmp/azure-cli" \

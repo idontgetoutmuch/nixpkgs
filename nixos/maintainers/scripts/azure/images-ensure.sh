@@ -43,6 +43,6 @@ for brev in "${builds[@]}"; do
     "${OUTDIR}/${brev}/disk.vhd" \
     "$(cat "${OUTDIR}/${brev}_name")")"
 
-  echo "${brev}: ${url}"
+  echo "${brev}: ${url}" >> "${OUTDIR}/_IMAGES.txt"
 done
 
