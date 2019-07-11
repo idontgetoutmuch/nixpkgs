@@ -7,6 +7,17 @@
 #  ./mkimage.sh upload "result/disk.vhd" "nixos.19.03-git-abcdef.vhd"
 #  ./mkimage.sh copy "<url from inet>" "nixos.19.03-git-abcdef.vhd"
 
+# God I fucking hate Azure.
+# I don't want N resource groups for N locations
+# So the literal only other option is to stuff the god damn location
+# into the image (and blob, for congruency's sake).
+# which makes copying a pain in the ass because we're going to need the user
+# to either tell us the source AND destination blob names...
+# or we have to sort of intelligently try to trim off the azure location name frm
+# the blob, but we can't guarantee teh copied blob fits our filename format. STUPID
+# maybe we can stash the original VHD name in an attribute and retrieve it later
+# and/or use blob metadata to see if WE uploaded this and thus know how to handle it
+
 set -euo pipefail
 set -x
 function az() { ./az.sh "${@}" --subscription "${AZURE_SUBSCRIPTION_ID}"; }
@@ -16,8 +27,9 @@ export AZURE_LOCATION="${AZURE_LOCATION:-"westus2"}"
 
 AZURE_RESOURCE_GROUP="NIXOS_PRODUCTION"
 AZURE_STORAGE_CONTAINER="vhds"
-AZURE_STORAGE_TYPE="Premium_LRS"
-AZURE_REPLICA=1
+#AZURE_STORAGE_TYPE="Premium_LRS" # can't use public access containers with premium storage because *Azure*!
+AZURE_STORAGE_TYPE="Standard_LRS"
+AZURE_REPLICA=0
 AZURE_STORAGE_ACCOUNT="nixos${AZURE_REPLICA}${AZURE_LOCATION}$(echo "${AZURE_SUBSCRIPTION_ID}" | cut -d- -f1)" # note: expert: stg acct uniqueness is hard
 
 if [[ "${1:-}" == "copy" ]]; then
@@ -33,7 +45,7 @@ elif [[ "${1:-}" == "upload" ]]; then
   if [[ "${3:-}" != "" ]]; then
     imgname="${3}"
   fi
-  imgname="${imgname}"
+  imgname="${imgname::-4}-${AZURE_LOCATION}.vhd"
 else
   printf "must specify 'copy <uri>', or 'upload <file>'" >/dev/stderr
   exit -1
@@ -50,14 +62,14 @@ if az image show -n "$imgname" -g "${AZURE_RESOURCE_GROUP}" &>/dev/stderr; then
 fi
 
 az storage account show -n "$AZURE_STORAGE_ACCOUNT" -g "${AZURE_RESOURCE_GROUP}" >/dev/stderr || \
-  az storage account create -n "$AZURE_STORAGE_ACCOUNT" -g "${AZURE_RESOURCE_GROUP}" --sku "$AZURE_STORAGE_TYPE" --kind "StorageV2" >/dev/stderr
+  az storage account create -n "$AZURE_STORAGE_ACCOUNT" -g "${AZURE_RESOURCE_GROUP}" --location "${AZURE_LOCATION}" --sku "$AZURE_STORAGE_TYPE" --kind "StorageV2" >/dev/stderr
 export AZURE_STORAGE_CONNECTION_STRING="$(az storage account show-connection-string \
   -n "$AZURE_STORAGE_ACCOUNT" -g "${AZURE_RESOURCE_GROUP}" --query connectionString --output tsv)"
 az storage container show -n "$AZURE_STORAGE_CONTAINER" >/dev/stderr || \
   az storage container create \
   --name "$AZURE_STORAGE_CONTAINER" \
-   >/dev/stderr
-  #--public-access "container" \
+  --public-access "container" --debug &>/tmp/azure-cli/azuresucks2
+   #>/dev/stderr
 
 az storage blob show --container "$AZURE_STORAGE_CONTAINER" --name "$imgname" >/dev/stderr || \
   (
