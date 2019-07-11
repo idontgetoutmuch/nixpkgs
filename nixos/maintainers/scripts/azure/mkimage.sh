@@ -34,6 +34,12 @@ AZURE_STORAGE_ACCOUNT="nixos${AZURE_REPLICA}${AZURE_LOCATION}$(echo "${AZURE_SUB
 
 if [[ "${1:-}" == "copy" ]]; then
   mode="copy"
+  #target="${2}"
+  # make azure image with local nixpkgs somehow
+  #imgname="$(basename "${target}")"
+
+elif [[ "${1:-}" == "build" ]]; then
+  mode="build"
   target="${2}"
   imgname="$(basename "${target}")"
 
@@ -68,7 +74,7 @@ export AZURE_STORAGE_CONNECTION_STRING="$(az storage account show-connection-str
 az storage container show -n "$AZURE_STORAGE_CONTAINER" >/dev/stderr || \
   az storage container create \
   --name "$AZURE_STORAGE_CONTAINER" \
-  --public-access "container" --debug &>/tmp/azure-cli/azuresucks2
+  --public-access "container" &>/tmp/azure-cli/azuresucks2
    #>/dev/stderr
 
 az storage blob show --container "$AZURE_STORAGE_CONTAINER" --name "$imgname" >/dev/stderr || \
@@ -96,7 +102,6 @@ imgurl="$(az storage blob url -c "$AZURE_STORAGE_CONTAINER" -n "$imgname" -o jso
 
 az image show -g "${AZURE_RESOURCE_GROUP}" -n "$imgname" >/dev/stderr || \
   az image create \
-  --debug \
     --name "$imgname" \
     --source "${imgurl}" \
     --resource-group "${AZURE_RESOURCE_GROUP}" \

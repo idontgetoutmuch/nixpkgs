@@ -42,6 +42,7 @@ imageid="/subscriptions/aff271ee-e9be-4441-b9bb-42f5af4cbaeb/resourceGroups/NIXO
 
 `custom-image-example/` contains an example of a custom image.
 
+
 ### Background
 
 These scripts are meant to be a one-stop shop.
@@ -53,6 +54,7 @@ This functionality is these scripts is non-trivial. It handles:
 1. creating *any and all* necessary missing resources
 2. replicating the specified VHD blob to your own storage account/location
 3. automatic unique naming per all of Azure's contraints: supports multi-region, multi-replica, multi-subscription magic, meaning it should "just work" out of the box, and the official account will be simply be official by naturing of living in the official NixOS storage account .
+
 
 ### TODO
 

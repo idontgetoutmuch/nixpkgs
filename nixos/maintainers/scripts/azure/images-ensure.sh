@@ -30,6 +30,7 @@ mkdir -p "${OUTDIR}"
 # TODO: replace this with something that lists out the
 # images that don't have a URI yet
 declare -a builds=(
+  "nixos_latest"
   "nixos_19_03__9ec7625cee5365c741dee7b45a19aff5d5d56205"
 )
 
