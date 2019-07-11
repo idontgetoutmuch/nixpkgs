@@ -1,2 +1,0 @@
-1. fix the location name being part of the managed disk id
-2. fix the output of mkimage.sh so that it can output the image id and the blob url (caller can pick what they need)
