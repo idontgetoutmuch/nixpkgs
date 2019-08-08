@@ -52,6 +52,9 @@ elif [[ "${1:-}" == "upload" ]]; then
     imgname="${3}"
   fi
   imgname="${imgname::-4}-${AZURE_LOCATION}.vhd"
+elif [[ "${1:-}" == "replicate" ]]; then
+
+
 else
   printf "must specify 'copy <uri>', or 'upload <file>'" >/dev/stderr
   exit -1
