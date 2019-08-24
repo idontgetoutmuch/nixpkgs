@@ -1,11 +1,11 @@
 { modulePath, config, pkgs, ... }:
 
-with lib;
+with pkgs.lib;
 {
-  config = {
     imports = [
       "${modulePath}/virtualisation/azure-common.nix"
     ];
+  config = {
     
     services.openssh.permitRootLogin = "no";
     security.sudo.wheelNeedsPassword = false;
