@@ -88,8 +88,7 @@ Additionally, there are scripts in this directory that automate this process.
       --resource-group "${group}" \
       --name "${diskname}" \
       --source "${diskid}" \
-      --os-type "linux" \
-      --debug
+      --os-type "linux"
     ```
 
 ## Create SIG Image
