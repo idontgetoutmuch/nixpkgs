@@ -1,74 +1,162 @@
 # nixos/azure
 
-### Usage
+This README should get you up and running with an "unofficial" or custom NixOS image on Azure.
 
-#### Create & Upload "Official" Images
+There are scripts in this directory that automate this process. They are expected to work; this README is a best effort to document the process for other end users, or as a guide to adapt the scripts here for your own purposes.
 
-1. Update `./azure-images-src.nix`, as appropriate.
-2. From `<nixpkgs>/nixos/maintainers/scripts/azure`, run `./images-ensure.vhd`. This will ensure all images are built and re-upload them all.
-3. You should manually update `azure-images.nix` with the uploaded image URLs.
+## Overiew
 
-```bash
-nvim ./../../../modules/virtualisation/azure-images.nix
-./az.sh login # as needed
-./images-ensure.vhd
-```
+1. Create a blank managed disk.
+2. Grab the access token for it.
+3. Populate the disk:
+   * Via a blob upload of a custom image.
+   * Via replicating an "unofficial" published image.
+4. (Optional) Create a Shared Image Gallery for use in your subscription to replicate the managed disk to all locations.
 
+This README will guide you through that process.
 
-#### Booting Image
+Additionally, there are scripts in this directory that automate this process.
 
-Pick an image from `../../../modules/virtualisation/azure-images.nix`.
+#### Considerations
 
-Use like so:
+1. `./az.sh` is used throughout, as it is a script that wraps the invocation of Azure CLI through Docker.
+2. `azcopy` is also necessary. See [\[Azure/azure-cli#10192\]](https://github.com/Azure/azure-cli/issues/10192) for some details. It is packaged in nixpkgs.
 
-```bash
-./az.sh login # as needed
+## Create Image
 
-# Create an Azure Image in your subscription with given URL:
-imgurl="https://nixos0westus2aff271ee.blob.core.windows.net/vhds/nixos-image-19.09.git.cmpkgs3-x86_64-linux.vhd" # from `azure-images.nix`
-imageid="$(./mkimage.sh copy "${imgurl}")"
+1. Setup:
+    ```bash
+    group="nixosvhds"     # target resource group
+    diskname="nixosDisk1" # disk name
+    size="50"             # disk size in GB
+    location="westus2"    # (mostly unimportant due to SIG replication)
 
-# or if you have already uploaded one in your subscription
-imageid="/subscriptions/aff271ee-e9be-4441-b9bb-42f5af4cbaeb/resourceGroups/NIXOS_PRODUCTION/providers/Microsoft.Compute/images/nixos-image-19.09.git.cmpkgs3-x86_64-linux.vhd"
+    ./az.sh login
+    ./az.sh group create \
+      --name "${group}" \
+      --location "${location}"
+    ```
 
-# Boot an Azure VM from your image:
-./mkvm.sh "${imageid}"
-```
+2. Create the Managed Disk for upload:
+    ```bash
+    ./az.sh disk create \
+      --resource-group "${group}" \
+      --name "${diskname}" \
+      --size-gb "${size}" \
+      --for-upload true
+    ```
+ 
+3. Create a SAS URL for the blob backing the Managed Disk:
+    ```bash
+    timeout=$(( 60 * 60 )) # disk access token timeout
+    sasurl="$(\
+      ./az.sh disk grant-access \
+        --access-level Write \
+        --resource-group "${group}" \
+        --name "${diskname}" \
+        --duration-in-seconds ${timeout} \
+          | jq -r '.accessSas'
+    )"
+    ```
 
-`mkvm.sh` takes an Azure image id that looks like this: `/subscriptions/aff271ee-e9be-4441-b9bb-42f5af4cbaeb/resourceGroups/NIXOS_PRODUCTION/providers/Microsoft.Compute/images/nixos-image-19.09.git.cmpkgs3-x86_64-linux.vhd`. You only need to create an image once in your subscription (unless you need more replicas for high capacity reasons, etc).
+4. Populate the Managed Disk in one of two ways:
+   * Upload a new VHD
+      ```bash
+      vhd="$(nix-build -A azure-vhd ...)" # TODO: flesh this out
+      
+      azcopy copy "${vhd}" "${sasurl}" \
+        --blob-type PageBlob
+      ```
+   *  Replicate an existing image 
+      ```bash
+      url="https://nixosprdctvhds.blob.core.windows.net/vhds/production.vhd" # TODO: real example
+    
+      azcopy copy "${url}" "${sasurl}" \
+        --blob-type PageBlob
+      ```
 
+5. Revoke the disk SAS token
+    ```bash
+    ./az.sh disk revoke-access \
+       --resource-group "${group}" \
+       --name "${diskname}"
+    ```
 
-#### Custom Image
+6. Create an "image" from the managed disk
+    ```bash
+    diskid="$(./az.sh disk show -g "${group}" -n "${diskname}" -o json | jq -r .id)"
+ 
+    ./az.sh image create \
+      --resource-group "${group}" \
+      --name "${diskname}" \
+      --source "${diskid}" \
+      --os-type "linux"
+    ```
 
-`custom-image-example/` contains an example of a custom image.
+## Create SIG Image
 
+This step lets you replicate your managed disk to all locations via an Azure **Shared Image Gallery**.
 
-### Background
+1. Setup/Config
+    ```bash
+    gallery="nixosvhds"
+ 
+    publisher="publisher"
+    offer="offer"
+    sku="sku"
+    
+    sig_imagename="nixos"
+    sig_version="1.0.0"
 
-These scripts are meant to be a one-stop shop.
-* `./images-ensure.sh` is meant to be idempotent. It will ensure all images from `./azure-images-src.nix` are built and uploaded.
-* `./mkimage.sh` is normally called by `./images-ensure`, but can also be used manually to upload an image or internal-to-Azure copy an existing image blob.
-* `./mkvm.sh` takes an image id (as output by `./mkimage.sh`) and will boot a new Azure VM with decent-enough defaults to sanity check the image(s).
+    imageid="$(./az.sh image show -g "${group}" -n "${diskname}" -o json | jq -r .id)"
+    ```
 
-This functionality is these scripts is non-trivial. It handles:
-1. creating *any and all* necessary missing resources
-2. replicating the specified VHD blob to your own storage account/location
-3. automatic unique naming per all of Azure's contraints: supports multi-region, multi-replica, multi-subscription magic, meaning it should "just work" out of the box, and the official account will be simply be official by naturing of living in the official NixOS storage account .
+2. Create the Shared Image Gallery if you have not already:
+    ```bash
+    ./az.sh sig create \
+      --resource-group "${group}" \
+      --gallery-name "${gallery}"
+    ```
 
+3. Create the SIG Image Definition
+    ```bash
+    ./az.sh sig image-definition create \
+      --resource-group "${group}" \
+      --gallery-name "${gallery}" \
+      --gallery-image "${sig_imagename}" \
+      --publisher "${publisher}" \
+      --offer "${offer}" \
+      --sku "${sku}" \
+      --os-type "linux"
+    ```
+
+4. Replicate the disk image as an instance of the image definition in the Shared Image Gallery: 
+    ```bash 
+    ./az.sh sig image-version create \
+      --resource-group "${group}" \
+      --gallery-name "${gallery}" \
+      --gallery-image-definition "${sig_imagename}" \
+      --gallery-image-version "${sig_imageversion}" \
+      --target-regions "WestCentralUS" "WestUS2" "WestUS" \
+      --replica-count 2 \
+      --managed-image "${imageid}"
+ 
+    # TODO: why is there no refernce to the SKU?
+    ```
+
+## Test it Out!
+
+Boot a new VM from your custom SIG Image:
+  ```bash
+  ./az.sh vm create \
+    ...
+  ```
 
 ### TODO
 
-1. Get `azure-cli` into nixpkgs properly and stop relying on `docker`.
-2. Make `./images-ensure.sh` only uploads missing images.
-3. fix the location name being part of the managed disk id
-4. fix the output of mkimage.sh so that it can output the image id and the blob url (caller can pick what they need)
+1. WTF are `publisher` / `offer` / `sku`? can we just set all to `"nixos"`? maybe `sku/offer="19.03"` and then we can push new versions of images
 
+2. Make a script that just ingests the most recent released image in Azure to a
+new or existing SIG in the user's subscription, all in one go.
 
-### NixOS Administrative Notes:
-
-We should:
-
-1. Make sure a few people have public Azure accounts.
-2. Add them all to the RG that contains the SA, etc.
-3. Make sure at least two people remember that (1) they have access, (2) their microsoft account logins.
-
+3. `azcopy` package should have the binary as `azcopy` rather than `azure-storage-azcopy`.
