@@ -156,3 +156,5 @@ Boot a new VM from your custom SIG Image:
 
 2. Make a script that just ingests the most recent released image in Azure to a
 new or existing SIG in the user's subscription, all in one go.
+
+3. `azcopy` package should have the binary as `azcopy` rather than `azure-storage-azcopy`.
