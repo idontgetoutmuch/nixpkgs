@@ -12,6 +12,16 @@ buildGoModule rec {
     sha256 = "1vzr2vccywnph2g8cp7mivyv5cwvwcdpr1j8kf6wq14nkwqlhx7z";
   };
 
+  postInstall = ''
+    mv \
+      "${placeholder ''out''}/bin/azure-storage-azcopy" \
+      "${placeholder ''out''}/bin/azcopy"
+    ln -s \
+      "${placeholder ''out''}/bin/azcopy" \
+      "${placeholder ''out''}/bin/azcopy-storage-azcopy"
+    rm testSuite
+  '';
+
   modSha256 = "107ddr6rvpfwxa1z0dhsck0mnki6jh7i5862z15k1acwql8r8wmf";
 
   meta = with stdenv.lib; {
