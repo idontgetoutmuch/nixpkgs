@@ -4,6 +4,8 @@ This README should get you up and running with an "unofficial" or custom NixOS i
 
 There are scripts in this directory that automate this process. They are expected to work; this README is a best effort to document the process for other end users, or as a guide to adapt the scripts here for your own purposes.
 
+Azure does not allow publishing public images without using their Marketplace. As such, NixOS will only upload images to a singular place, and then they can be replicated  TODO: Finish this boring text.
+
 ## Overiew
 
 1. Create a blank managed disk.

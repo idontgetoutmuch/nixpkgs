@@ -4,18 +4,9 @@ set -euo pipefail
 
 ### <CONFIG>
 group="nixosvhds"     # target resource group
-diskname="nixosDisk1" # disk name
+diskname="nixosDisk1" # disk/image name
 size="50"             # disk size in GB
 location="westus2"    # (mostly unimportant due to SIG replication)
-
-gallery="nixosvhds"
-
-publisher="nixos"
-offer="nixos"
-sku="nixos"
-
-sig_imagename="nixos"
-sig_imageversion="1.0.0"
 ### </CONFIG>
 
 ## MODE
