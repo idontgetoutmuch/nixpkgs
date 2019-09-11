@@ -30,7 +30,9 @@ You'll want to have all of these installed: `jq`, `azure-storage-azcopy`, `docke
 
 ### Create From Released Image
 ```bash
-azimage="[select URL from above]"
+source="[select URL from above]"
+imagename="nixos_1903_20190911_103149"
+azimage="$(./create-image.sh "${imagename}" "${source}"
 azsigimage="$(./create-sig-image-version.sh "1.0.0" "${azimage}")"
 
 # boot
