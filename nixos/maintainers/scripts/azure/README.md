@@ -74,8 +74,10 @@ azimage="$(./create-image.sh "${disk}")"
   --disk-size-in-gb "100" \
   --image "${azimage}" \
   --admin-username "${USER}" \
-  --location "WestCentralUS" \
+  --location "westus2" \
   --ssh-key-values "$(ssh-add -L)"
 
 # TODO: how to retrieve the URL for the managed disk and have it be public, forever?
+
+# TODO: where to store URLs?
 ```
