@@ -32,8 +32,8 @@ You'll want to have all of these installed: `jq`, `azure-storage-azcopy`, `docke
 ```bash
 source="[select URL from above]"
 imagename="nixos_1903_20190911_103149"
-azimage="$(./create-image.sh "${imagename}" "${source}")"
-azsigimage="$(./create-sig-image-version.sh "1.0.0" "${azimage}")"
+azimage="$(group=nixos-user-vhds ./create-image.sh "${imagename}" "${source}")"
+azsigimage="$(group=nixos-user-vhds ./create-sig-image-version.sh "1.0.0" "${azimage}")"
 
 # boot
 ./az.sh vm create \
@@ -49,8 +49,8 @@ azsigimage="$(./create-sig-image-version.sh "1.0.0" "${azimage}")"
 ### Create From Custom Image
 ```bash
 disk="$(./build-custom-vhd.sh)/disk.vhd"
-azimage="$(./create-image.sh "nixos-${RANDOM}" "${disk}")"
-azsigimage="$(./create-sig-image-version.sh "1.0.0" "${azimage}")"
+azimage="$(group=nixos-user-vhds ./create-image.sh "nixos-${RANDOM}" "${disk}")"
+azsigimage="$(group=nixos-user-vhds ./create-sig-image-version.sh "1.0.0" "${azimage}")"
 
 # boot
 ./az.sh vm create \
@@ -73,7 +73,7 @@ nvim ./release-images.nix
 # use the new image name in this step:
 image="nixos_1903_20190911_103149"
 disk="$(./build-release-vhd.sh "${image}")/disk.vhd"
-azimage="$(./create-image.sh "${image}" "${disk}")"
+azimage="$(group=nixos-release-vhds ./create-image.sh "${image}" "${disk}")"
 # (we don't need a private SIG Image for a release image, so skip it)
 
 # test the released image

@@ -3,9 +3,9 @@ set -x
 set -euo pipefail
 
 ### <CONFIG>
-group="nixosvhds"     # target resource group
-size="50"             # disk size in GB
-location="westus2"    # (mostly unimportant due to SIG replication)
+group="${group:-"nixosvhds"}"     # target resource group
+size="${size:-50}"             # disk size in GB
+location="${location:-"westus2"}"    # (mostly unimportant due to SIG replication)
 ### </CONFIG>
 
 ## MODE
