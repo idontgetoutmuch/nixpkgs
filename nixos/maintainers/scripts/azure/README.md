@@ -17,7 +17,10 @@ The scripts in this directory automate this and require only a couple of steps i
 
 #### Considerations
 
+0. **NOTE: USUAL AZURE QUALITY APPLIES**: When running these scripts most recently, they did not execute cleanly or correctly a single time. In the most cohesive run, it still took nearly 45 minutes to get an existing image replicated and booted. Good luck.
+
 1. `./az.sh` is a script that wraps `azure-cli`. The Azure CLI is not currently able to be packaged with `pypi2nix` (see: [\[Azure/azure-cli#10232\]](https://github.com/Azure/azure-cli/issues/10232)).
+
 2. `azcopy` is also necessary. See [\[Azure/azure-cli#10192\]](https://github.com/Azure/azure-cli/issues/10192) for some details. It is packaged in nixpkgs as `azure-storage-azcopy`.
 
 You'll want to have all of these installed: `jq`, `azure-storage-azcopy`, `docker`.
