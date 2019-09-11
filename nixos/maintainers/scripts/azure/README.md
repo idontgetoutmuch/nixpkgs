@@ -26,7 +26,7 @@ You'll want to have all of these installed: `jq`, `azure-storage-azcopy`, `docke
 
 #### Released URLs:
 
-* **`nixos_1903_20190911_103149`**: `https://md-mr3x0kwh0vs4.blob.core.windows.net/d53pr4j5kkjv/abcd?sv=2017-04-17&sr=b&si=deacae49-c3b9-4876-b6cf-72ebcdf43bfa&sig=bpkCqnAV993C5t%2BkXM1JoOCcRh2Bl6BUaciT4Ejs4Qc%3D`
+* **`nixos_1903_20190911_103149`**: `https://md-mr3x0kwh0vs4.blob.core.windows.net/d53pr4j5kkjv/abcd?sv=2017-04-17&sr=b&si=f4721472-103f-455d-a93e-c939f915cfff&sig=dYy7qLFywMHkixLE1qQY4X3ZEVEGPP997ZUa1sTBRvI%3D`
 
 ### Create From Released Image
 ```bash
@@ -96,5 +96,6 @@ group="nixos-testvm-$RANDOM"
 ./az.sh disk grant-access \
   --resource-group nixosvhds \
   --name "${image}" \
-  --duration-in-seconds "$(( 365 * 24 * 60 * 60 ))"
+  --duration-in-seconds "$(( 365 * 24 * 60 * 60 ))" \
+    | jq -r .accessSas
 ```

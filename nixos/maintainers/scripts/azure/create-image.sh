@@ -45,6 +45,8 @@ diskid="$(./az.sh disk show -g "${group}" -n "${diskname}" -o json | jq -r .id)"
   --resource-group "${group}" \
   --name "${diskname}" \
   --source "${diskid}" \
-  --os-type "linux"
+  --os-type "linux" >/dev/null
 
 imageid="$(./az.sh image show -g "${group}" -n "${diskname}" -o json | jq -r .id)"
+
+echo "${imageid}"
