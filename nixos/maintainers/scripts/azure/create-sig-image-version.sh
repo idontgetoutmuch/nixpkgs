@@ -2,7 +2,10 @@
 set -x
 set -euo pipefail
 
-### USAGE: ./create-sig-image-version.sh <image_version> <image_id>
+### USAGE:   ./create-sig-image-version.sh <image_version> <image_id>
+### EXAMPLE: ./create-sig-image-version.sh \
+#                1.0.0 \
+#                /subscriptions/xx-xx-xx/resourceGroups/g1/disks/nixos-disk1.vhd
 
 sig_imageversion="${1}"; shift
 imageid="${1}"; shift
@@ -47,11 +50,3 @@ sig_imageid="$(\
     --gallery-image-version "${sig_imageversion}" \
     | jq -r ".id"
 )"
-
-./az.sh vm create \
-  --name "vm-${r}" \
-  --resource-group "${group}" \
-  --image "${sig_imageid}" \
-  --admin-username "${USER}" \
-  --location "WestCentralUS" \
-  --ssh-key-values "$(ssh-add -L)"
