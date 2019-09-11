@@ -41,7 +41,7 @@ azsigimage="$(./create-sig-image-version.sh "1.0.0" "${azimage}")"
 ### Create From Custom Image
 ```bash
 disk="$(./build-custom-vhd.sh)/disk.vhd"
-azimage="$(./create-image.sh "${disk}")"
+azimage="$(./create-image.sh "nixos-${RANDOM}" "${disk}")"
 azsigimage="$(./create-sig-image-version.sh "1.0.0" "${azimage}")"
 
 # boot
@@ -63,8 +63,9 @@ azsigimage="$(./create-sig-image-version.sh "1.0.0" "${azimage}")"
 nvim ./release-images.nix
 
 # use the new image name in this step:
-disk="$(./build-release-vhd.sh "nixos_1903_20190911_103149")/disk.vhd"
-azimage="$(./create-image.sh "${disk}")"
+image="nixos_1903_20190911_103149"
+disk="$(./build-release-vhd.sh "${image}")/disk.vhd"
+azimage="$(./create-image.sh "${image}" "${disk}")"
 # (we don't need a private SIG Image for a release image, so skip it)
 
 # test the released image
