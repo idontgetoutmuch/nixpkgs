@@ -24,9 +24,13 @@ You'll want to have all of these installed: `jq`, `azure-storage-azcopy`, `docke
 
 ## **Usage**: End Users
 
+#### Released URLs:
+
+* `nixos-19.03 on 2019-09-11`: `https://md-mr3x0kwh0vs4.blob.core.windows.net/d53pr4j5kkjv/abcd?sv=2017-04-17&sr=b&si=deacae49-c3b9-4876-b6cf-72ebcdf43bfa&sig=bpkCqnAV993C5t%2BkXM1JoOCcRh2Bl6BUaciT4Ejs4Qc%3D`
+
 ### Create From Released Image
 ```bash
-azimage="https://RELEASE_URL" # TODO: fill it with initial release
+azimage="[select URL from above]"
 azsigimage="$(./create-sig-image-version.sh "1.0.0" "${azimage}")"
 
 # boot
@@ -80,7 +84,9 @@ azimage="$(./create-image.sh "${image}" "${disk}")"
   --location "westus2" \
   --ssh-key-values "$(ssh-add -L)"
 
-# TODO: how to retrieve the URL for the managed disk and have it be public, forever?
-
-# TODO: where to store URLs?
+# get a URL that is valid for 10 years, used for publishing releases:
+./az.sh disk grant-access \
+  --resource-group nixosvhds \
+  --name "${image}" \
+  --duration-in-seconds "$(( 365 * 24 * 60 * 60 ))"
 ```
