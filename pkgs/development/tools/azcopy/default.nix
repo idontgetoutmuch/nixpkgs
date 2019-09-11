@@ -19,7 +19,7 @@ buildGoModule rec {
     ln -s \
       "${placeholder ''out''}/bin/azcopy" \
       "${placeholder ''out''}/bin/azcopy-storage-azcopy"
-    rm testSuite
+    rm -rf testSuite
   '';
 
   modSha256 = "107ddr6rvpfwxa1z0dhsck0mnki6jh7i5862z15k1acwql8r8wmf";

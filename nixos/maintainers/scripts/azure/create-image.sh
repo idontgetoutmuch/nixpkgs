@@ -4,12 +4,12 @@ set -euo pipefail
 
 ### <CONFIG>
 group="nixosvhds"     # target resource group
-diskname="nixosDisk1" # disk/image name
 size="50"             # disk size in GB
 location="westus2"    # (mostly unimportant due to SIG replication)
 ### </CONFIG>
 
 ## MODE
+diskname="${1}"; shift
 source="${1}"; shift
 
 ./az.sh group create \
