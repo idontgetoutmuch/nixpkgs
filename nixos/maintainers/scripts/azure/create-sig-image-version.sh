@@ -42,11 +42,9 @@ sig_imagename="nixos"
   --replica-count 2 \
   --managed-image "${imageid}"
 
-sig_imageid="$(\
-  ./az.sh sig image-version show \
-    --resource-group "${group}" \
-    --gallery-name "${gallery}" \
-    --gallery-image-definition "${sig_imagename}" \
-    --gallery-image-version "${sig_imageversion}" \
+./az.sh sig image-version show \
+  --resource-group "${group}" \
+  --gallery-name "${gallery}" \
+  --gallery-image-definition "${sig_imagename}" \
+  --gallery-image-version "${sig_imageversion}" \
     | jq -r ".id"
-)"

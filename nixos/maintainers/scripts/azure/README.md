@@ -31,7 +31,7 @@ azsigimage="$(./create-sig-image-version.sh "1.0.0" "${azimage}")"
 ./az.sh vm create \
   --name "testVM" \
   --resource-group "existingGroup" \
-  --disk-size-in-gb "100" \
+  --os-disk-size-gb "100" \
   --image "${azsigimage}" \
   --admin-username "${USER}" \
   --location "WestCentralUS" \
@@ -71,7 +71,7 @@ azimage="$(./create-image.sh "${disk}")"
 ./az.sh vm create \
   --name "testVM" \
   --resource-group "existingGroup" \
-  --disk-size-in-gb "100" \
+  --os-disk-size-gb "100" \
   --image "${azimage}" \
   --admin-username "${USER}" \
   --location "westus2" \
