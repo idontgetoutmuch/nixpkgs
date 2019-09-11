@@ -36,9 +36,11 @@ azimage="$(group=nixos-user-vhds ./create-image.sh "${imagename}" "${source}")"
 azsigimage="$(group=nixos-user-vhds ./create-sig-image-version.sh "1.0.0" "${azimage}")"
 
 # boot
+group="nixos-testvm-$RANDOM"
+./az.sh group create -n "${group}" -l "westus2"
 ./az.sh vm create \
   --name "testVM" \
-  --resource-group "existingGroup" \
+  --resource-group "${group}" \
   --os-disk-size-gb "100" \
   --image "${azsigimage}" \
   --admin-username "${USER}" \
@@ -53,9 +55,11 @@ azimage="$(group=nixos-user-vhds ./create-image.sh "nixos-${RANDOM}" "${disk}")"
 azsigimage="$(group=nixos-user-vhds ./create-sig-image-version.sh "1.0.0" "${azimage}")"
 
 # boot
+group="nixos-testvm-$RANDOM"
+./az.sh group create -n "${group}" -l "westus2"
 ./az.sh vm create \
   --name "testVM" \
-  --resource-group "existingGroup" \
+  --resource-group "${group}" \
   --os-disk-size-gb "100" \
   --image "${azsigimage}" \
   --admin-username "${USER}" \
@@ -77,9 +81,11 @@ azimage="$(group=nixos-release-vhds ./create-image.sh "${image}" "${disk}")"
 # (we don't need a private SIG Image for a release image, so skip it)
 
 # test the released image
+group="nixos-testvm-$RANDOM"
+./az.sh group create -n "${group}" -l "westus2"
 ./az.sh vm create \
   --name "testVM" \
-  --resource-group "existingGroup" \
+  --resource-group "${group}" \
   --os-disk-size-gb "100" \
   --image "${azimage}" \
   --admin-username "${USER}" \

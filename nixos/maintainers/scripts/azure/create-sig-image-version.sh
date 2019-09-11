@@ -7,20 +7,16 @@ set -euo pipefail
 #                1.0.0 \
 #                /subscriptions/xx-xx-xx/resourceGroups/g1/disks/nixos-disk1.vhd
 
-group="nixosimages"
+group="${group:-"nixosimages"}"
 
 sig_imageversion="${1}"; shift
 imageid="${1}"; shift
 
-### <CONFIG>
 gallery="nixosvhds"
-
 publisher="nixos"
 offer="nixos"
 sku="nixos"
-
 sig_imagename="nixos"
-### </CONFIG>
 
 ./az.sh group create -n "${group}" -l "westus2"
 ./az.sh sig create \
