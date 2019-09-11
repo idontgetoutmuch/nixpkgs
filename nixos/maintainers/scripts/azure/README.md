@@ -48,7 +48,7 @@ azsigimage="$(./create-sig-image-version.sh "1.0.0" "${azimage}")"
 ./az.sh vm create \
   --name "testVM" \
   --resource-group "existingGroup" \
-  --disk-size-in-gb "100" \
+  --os-disk-size-gb "100" \
   --image "${azsigimage}" \
   --admin-username "${USER}" \
   --location "WestCentralUS" \
