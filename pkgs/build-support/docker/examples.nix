@@ -95,7 +95,7 @@ rec {
 
   # 5. example of multiple contents, emacs and vi happily coexisting
   editors = buildImage {
-    name = "editors";
+    name = "editrs";
     contents = [
       pkgs.coreutils
       pkgs.bash
@@ -104,7 +104,30 @@ rec {
       pkgs.nano
     ];
   };
+  
+  # 5a. example of R
+  rR = buildImage {
+    name = "rR";
+    contents = [
+      pkgs.coreutils
+      pkgs.bash
+      (pkgs.rWrapper.override{ packages = with pkgs.rPackages; [ ggplot2 dplyr ]; })
+    ];
+    extraCommands = ''
+        mkdir -p tmp
+      '';
+  };
 
+  pyter = buildImage {
+    name = "pyter";
+    contents = [
+      pkgs.coreutils
+      pkgs.bash
+      pkgs.pythonPackages.numpy
+      pkgs.pythonPackages.notebook
+    ];
+  };
+  
   # 6. nix example to play with the container nix store
   # docker run -it --rm nix nix-store -qR $(nix-build '<nixpkgs>' -A nix)
   nix = buildImageWithNixDb {

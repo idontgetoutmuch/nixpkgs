@@ -18,12 +18,12 @@ offer="nixos"
 sku="nixos"
 sig_imagename="nixos"
 
-./az.sh group create -n "${group}" -l "westus2"
-./az.sh sig create \
+az group create -n "${group}" -l "uksouth"
+az sig create \
   --resource-group "${group}" \
   --gallery-name "${gallery}"
 
-./az.sh sig image-definition create \
+az sig image-definition create \
   --resource-group "${group}" \
   --gallery-name "${gallery}" \
   --gallery-image "${sig_imagename}" \
@@ -32,16 +32,16 @@ sig_imagename="nixos"
   --sku "${sku}" \
   --os-type "linux"
 
-./az.sh sig image-version create \
+az sig image-version create \
   --resource-group "${group}" \
   --gallery-name "${gallery}" \
   --gallery-image-definition "${sig_imagename}" \
   --gallery-image-version "${sig_imageversion}" \
-  --target-regions "WestCentralUS" "WestUS2" "WestUS" \
+  --target-regions "WestCentralUS" "Uksouth" "WestUS" \
   --replica-count 2 \
   --managed-image "${imageid}"
 
-./az.sh sig image-version show \
+az sig image-version show \
   --resource-group "${group}" \
   --gallery-name "${gallery}" \
   --gallery-image-definition "${sig_imagename}" \

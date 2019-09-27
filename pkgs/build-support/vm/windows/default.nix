@@ -24,7 +24,7 @@ in {
   in pkgs.lib.overrideDerivation drv (attrs: let
     bootstrap = bootstrapper attrs.windowsImage;
   in {
-    requiredSystemFeatures = [ "kvm" ];
+    requiredSystemFeatures = [  ];
     builder = "${pkgs.stdenv.shell}";
     args = ["-e" (bootstrap.resumeAndRun builder)];
     windowsImage = bootstrap.suspendedVM;

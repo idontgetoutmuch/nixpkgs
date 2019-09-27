@@ -2,7 +2,7 @@
   nixpkgs,
   rev,
   configFile ? "${nixpkgs}/nixos/modules/virtualisation/azure-config-user.nix",
-  diskSize?1536,
+  diskSize?2048,
   ... 
 }:
 let

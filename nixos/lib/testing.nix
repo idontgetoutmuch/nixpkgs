@@ -52,7 +52,7 @@ in rec {
     stdenv.mkDerivation {
       name = "vm-test-run-${driver.testName}";
 
-      requiredSystemFeatures = [ "kvm" "nixos-test" ];
+      requiredSystemFeatures = [  "nixos-test" ];
 
       buildInputs = [ libxslt ];
 
@@ -232,7 +232,7 @@ in rec {
 
     in
       lib.overrideDerivation drv (attrs: {
-        requiredSystemFeatures = [ "kvm" ];
+        requiredSystemFeatures = [  ];
         builder = "${bash}/bin/sh";
         args = ["-e" vmRunCommand];
         origArgs = attrs.args;
